@@ -1,0 +1,13 @@
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './providers/auth/auth.service';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('login')
+  public login(@Body() body: { email: string; password: string }) {
+    const { email, password } = body;
+    return this.authService.login(email, password, '123');
+  }
+}
