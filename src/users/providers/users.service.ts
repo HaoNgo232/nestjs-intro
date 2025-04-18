@@ -2,13 +2,33 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { GetUsersParamDto } from '../dtos/get-users-param.dto';
 import { AuthService } from '../../auth/providers/auth/auth.service';
+import { Repository } from 'typeorm';
+import { User } from '../user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CreateUserDto } from '../dtos/create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
+
+  public async createUser(createUserDto: CreateUserDto) {
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (!existingUser) {
+      const newUser = this.userRepository.create(createUserDto);
+      await this.userRepository.save(newUser);
+      return newUser;
+    } else {
+      return 'User already exists';
+    }
+  }
+
   public finAll(
     getUsersParamDto: GetUsersParamDto,
     limit: number = 10,

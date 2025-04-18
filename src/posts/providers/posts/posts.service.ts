@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../../users/providers/users.service';
 
 @Injectable()
 export class PostsService {
   constructor(private readonly usersService: UsersService) {}
+
   public findAllPosts(userId?: string) {
     if (!userId) {
       throw new Error('User ID is required');
@@ -31,5 +33,11 @@ export class PostsService {
         content: 'This is my third post',
       },
     ];
+  }
+
+  public createPost(createPostDto: any) {
+    // Here you would typically save the post to a database
+    // For now, we'll just return the created post
+    return createPostDto;
   }
 }
