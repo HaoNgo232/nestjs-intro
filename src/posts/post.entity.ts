@@ -1,9 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { postStatus } from './enums/postStatus.enum';
 import { PostType } from './enums/postType.enums';
-import { Matches, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { CreatePostMetaOptionsDto } from './dtos/create-post-meta-options.dto';
+import { Matches } from 'class-validator';
+import { MetaOptions } from '../meta-options/meta-options.entity';
 
 @Entity()
 export class Post {
@@ -64,16 +69,15 @@ export class Post {
   feeaturedImageUrl?: string;
 
   @Column({
-    type: 'datetime',
+    type: 'timestamp',
     nullable: true,
   })
   pulishOn?: Date;
 
-  @Column('simple-array', { nullable: true })
-  tags?: string[];
+  @OneToOne(() => MetaOptions)
+  @JoinColumn()
+  metaOptions?: MetaOptions;
 
   @Column('simple-array', { nullable: true })
-  @ValidateNested({ each: true })
-  @Type(() => CreatePostMetaOptionsDto)
-  metaOptions?: CreatePostMetaOptionsDto[];
+  tags?: string[];
 }

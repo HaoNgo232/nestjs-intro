@@ -1,10 +1,41 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Injectable } from '@nestjs/common';
+import { Body, Injectable } from '@nestjs/common';
 import { UsersService } from '../../../users/providers/users.service';
+import { CreatePostDto } from '../../dtos/create-post.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Post } from '../../post.entity';
+import { Repository } from 'typeorm';
+import { MetaOptions } from '../../../meta-options/meta-options.entity';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @InjectRepository(Post)
+    private readonly postRepository: Repository<Post>,
+
+    @InjectRepository(MetaOptions)
+    private readonly metaOptionsRepository: Repository<MetaOptions>,
+  ) {}
+
+  public async create(@Body() createPostDto: CreatePostDto) {
+    let metaOptions = createPostDto.metaOptions
+      ? this.metaOptionsRepository.create(createPostDto.metaOptions)
+      : null;
+
+    if (metaOptions) {
+      await this.metaOptionsRepository.save(metaOptions);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { metaOptions: _, ...dtoForPost } = createPostDto;
+    let post = this.postRepository.create(dtoForPost);
+
+    if (metaOptions) {
+      post.metaOptions = metaOptions;
+    }
+    return this.postRepository.save(post);
+  }
 
   public findAllPosts(userId?: string) {
     if (!userId) {
