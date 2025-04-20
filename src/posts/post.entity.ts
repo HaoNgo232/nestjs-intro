@@ -74,7 +74,9 @@ export class Post {
   })
   pulishOn?: Date;
 
-  @OneToOne(() => MetaOptions)
+  @OneToOne(() => MetaOptions, {
+    cascade: true,
+  })
   @JoinColumn()
   metaOptions?: MetaOptions;
 

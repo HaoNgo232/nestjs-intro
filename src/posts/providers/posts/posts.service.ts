@@ -20,20 +20,17 @@ export class PostsService {
   ) {}
 
   public async create(@Body() createPostDto: CreatePostDto) {
-    let metaOptions = createPostDto.metaOptions
-      ? this.metaOptionsRepository.create(createPostDto.metaOptions)
-      : null;
-
-    if (metaOptions) {
-      await this.metaOptionsRepository.save(metaOptions);
-    }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { metaOptions: _, ...dtoForPost } = createPostDto;
-    let post = this.postRepository.create(dtoForPost);
 
-    if (metaOptions) {
-      post.metaOptions = metaOptions;
-    }
+    const transformedDto = {
+      ...dtoForPost,
+      metaOptions: createPostDto.metaOptions
+        ? { ...createPostDto.metaOptions }
+        : undefined,
+    };
+
+    let post = this.postRepository.create(transformedDto);
     return this.postRepository.save(post);
   }
 
