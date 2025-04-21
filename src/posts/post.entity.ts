@@ -76,6 +76,7 @@ export class Post {
 
   @OneToOne(() => MetaOptions, {
     cascade: true,
+    eager: true, // Load the related MetaOptions entity apply to all queries
   })
   @JoinColumn()
   metaOptions?: MetaOptions;

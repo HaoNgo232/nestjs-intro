@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Body, Injectable } from '@nestjs/common';
@@ -13,7 +14,7 @@ export class PostsService {
   constructor(
     private readonly usersService: UsersService,
     @InjectRepository(Post)
-    private readonly postRepository: Repository<Post>,
+    private readonly postsRepository: Repository<Post>,
 
     @InjectRepository(MetaOptions)
     private readonly metaOptionsRepository: Repository<MetaOptions>,
@@ -30,42 +31,40 @@ export class PostsService {
         : undefined,
     };
 
-    let post = this.postRepository.create(transformedDto);
-    return this.postRepository.save(post);
+    let post = this.postsRepository.create(transformedDto);
+    return this.postsRepository.save(post);
   }
 
-  public findAllPosts(userId?: string) {
-    if (!userId) {
-      throw new Error('User ID is required');
+  public async findAll(userId?: string) {
+    if (userId) {
+      // Logic để tìm tất cả bài viết của người dùng có userId
+      return `Posts for user ${userId}`;
+    } else {
+      // Logic để tìm tất cả bài viết
+      const posts = await this.postsRepository.find({
+        relations: {
+          metaOptions: true, // This will load the metaOptions for each post - apply for this method
+        },
+      });
+      return posts;
     }
-
-    const user = this.usersService.findOneById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    return [
-      {
-        userId: user,
-        title: 'My first post',
-        content: 'This is my first post',
-      },
-      {
-        userId: user,
-        title: 'My second post',
-        content: 'This is my second post',
-      },
-      {
-        userId: user,
-        title: 'My third post',
-        content: 'This is my third post',
-      },
-    ];
   }
 
   public createPost(createPostDto: any) {
     // Here you would typically save the post to a database
     // For now, we'll just return the created post
     return createPostDto;
+  }
+
+  public async delete(id: number) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    let post = await this.postsRepository.findOneBy({ id });
+    await this.postsRepository.delete(id);
+    if (post && post.metaOptions) {
+      await this.metaOptionsRepository.delete(post.metaOptions.id);
+      return { deleted: true, id };
+    } else {
+      return { deleted: false, id };
+    }
   }
 }
