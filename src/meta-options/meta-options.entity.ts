@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Post } from '../posts/post.entity';
 
 @Entity()
 export class MetaOptions {
@@ -22,4 +25,10 @@ export class MetaOptions {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Post, (post) => post.metaOptions, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  post: Post;
 }

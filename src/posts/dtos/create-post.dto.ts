@@ -2,6 +2,7 @@ import {
   IsArray,
   IsDate,
   IsEnum,
+  IsInt,
   IsJSON,
   IsNotEmpty,
   IsOptional,
@@ -98,13 +99,13 @@ export class CreatePostDto {
   pulishOn?: Date;
 
   @ApiPropertyOptional({
-    description: 'The tags of the post',
-    example: ['tag1', 'tag2'],
+    description: 'Array of tag ids',
+    example: [1, 2, 3],
   })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  @IsInt({ each: true })
+  tags?: number[];
 
   @ApiPropertyOptional({
     type: 'array',
@@ -124,4 +125,13 @@ export class CreatePostDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePostMetaOptionsDto)
   metaOptions?: CreatePostMetaOptionsDto | null;
+
+  @ApiProperty({
+    type: 'integer',
+    required: true,
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsInt()
+  authorId: number;
 }

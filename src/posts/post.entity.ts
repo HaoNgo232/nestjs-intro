@@ -3,12 +3,16 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToOne,
-  JoinColumn,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { postStatus } from './enums/postStatus.enum';
 import { PostType } from './enums/postType.enums';
 import { Matches } from 'class-validator';
 import { MetaOptions } from '../meta-options/meta-options.entity';
+import { User } from '../users/user.entity';
+import { Tag } from '../tags/tag.entity';
 
 @Entity()
 export class Post {
@@ -74,13 +78,20 @@ export class Post {
   })
   pulishOn?: Date;
 
-  @OneToOne(() => MetaOptions, {
+  @OneToOne(() => MetaOptions, (metaOptions) => metaOptions.post, {
     cascade: true,
     eager: true, // Load the related MetaOptions entity apply to all queries
   })
-  @JoinColumn()
   metaOptions?: MetaOptions;
 
-  @Column('simple-array', { nullable: true })
-  tags?: string[];
+  @ManyToOne(() => User, (user) => user.post, {
+    eager: true,
+  })
+  author: User;
+
+  @ManyToMany(() => Tag, {
+    eager: true,
+  })
+  @JoinTable()
+  tags?: Tag[];
 }
