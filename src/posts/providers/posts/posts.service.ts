@@ -77,12 +77,6 @@ export class PostsService {
     return createPostDto;
   }
 
-  public async delete(id: number) {
-    await this.postsRepository.delete(id);
-
-    return { deleted: true, id };
-  }
-
   public async update(patchPostDto: PatchPostDto) {
     let tags = await this.tagService.findMultipleTags(patchPostDto.tags || []);
 
@@ -104,5 +98,11 @@ export class PostsService {
     post.tags = tags;
 
     return this.postsRepository.save(post);
+  }
+
+  public async delete(id: number) {
+    await this.postsRepository.delete(id);
+
+    return { deleted: true, id };
   }
 }
