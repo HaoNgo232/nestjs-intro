@@ -1,6 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { GetUsersParamDto } from '../dtos/get-users-param.dto';
 import { AuthService } from '../../auth/providers/auth/auth.service';
 import { Repository } from 'typeorm';
@@ -24,16 +31,40 @@ export class UsersService {
   ) {}
 
   public async createUser(createUserDto: CreateUserDto) {
-    const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
-    });
-    if (!existingUser) {
-      const newUser = this.userRepository.create(createUserDto);
-      await this.userRepository.save(newUser);
-      return newUser;
-    } else {
-      return 'User already exists';
+    let existingUser: User | null = null;
+
+    try {
+      existingUser = await this.userRepository.findOne({
+        where: { email: createUserDto.email },
+      });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
     }
+
+    if (existingUser) {
+      throw new BadRequestException(
+        'The user already exists, please check your email.',
+      );
+    }
+
+    const newUser = this.userRepository.create(createUserDto);
+
+    try {
+      await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+    return newUser;
   }
 
   public finAll(
@@ -41,29 +72,36 @@ export class UsersService {
     limit: number = 10,
     page: number = 1,
   ) {
-    console.log(this.profileConfiguration);
-    console.log(this.profileConfiguration.apiKey);
-
-    return [
+    throw new HttpException(
       {
-        userId: 1,
-        username: 'John Doe',
-        email: 'WlL3t@example.com',
+        status: HttpStatus.MOVED_PERMANENTLY,
+        error: 'The API endpoint does not exist',
+        fileName: 'users.service.ts',
+        lineNumber: 88,
       },
+      HttpStatus.MOVED_PERMANENTLY,
       {
-        userId: 2,
-        username: 'Maximilian',
-        email: 'WdfgW@example.com',
+        cause: new Error(),
+        description: 'Occured because theAPI endpoint was permanently moved',
       },
-      {
-        userId: 3,
-        username: 'Manuel',
-        email: 'KXKkI@example.com',
-      },
-    ];
+    );
   }
 
   public async findOneById(id: number) {
-    return await this.userRepository.findOneBy({ id });
+    let user: User | null = null;
+    try {
+      user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+      return user;
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
   }
 }
