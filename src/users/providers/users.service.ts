@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
@@ -10,12 +11,14 @@ import {
 } from '@nestjs/common';
 import { GetUsersParamDto } from '../dtos/get-users-param.dto';
 import { AuthService } from '../../auth/providers/auth/auth.service';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from '../user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { ConfigType } from '@nestjs/config';
 import profileConfig from '../config/profile.config';
+import { UsersCreateManyProvider } from './users-create-many.provider';
+import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +31,10 @@ export class UsersService {
 
     @Inject(profileConfig.KEY)
     private readonly profileConfiguration: ConfigType<typeof profileConfig>,
+
+    private readonly dataSource: DataSource,
+
+    private readonly usersCreateManyProvider: UsersCreateManyProvider,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto) {
@@ -67,24 +74,43 @@ export class UsersService {
     return newUser;
   }
 
-  public finAll(
-    getUsersParamDto: GetUsersParamDto,
-    limit: number = 10,
-    page: number = 1,
-  ) {
-    throw new HttpException(
-      {
-        status: HttpStatus.MOVED_PERMANENTLY,
-        error: 'The API endpoint does not exist',
-        fileName: 'users.service.ts',
-        lineNumber: 88,
-      },
-      HttpStatus.MOVED_PERMANENTLY,
-      {
-        cause: new Error(),
-        description: 'Occured because theAPI endpoint was permanently moved',
-      },
-    );
+  public async findUserById(id: number) {
+    let user: User | null = null;
+    try {
+      user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+    return user;
+  }
+
+  public async finAllUsers(limit: number, page: number) {
+    let users: User[] = [];
+    try {
+      users = await this.userRepository.find({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+    if (users.length === 0) {
+      throw new BadRequestException('No users found');
+    }
+    return users;
   }
 
   public async findOneById(id: number) {
@@ -103,5 +129,9 @@ export class UsersService {
         },
       );
     }
+  }
+
+  public async createMany(createManyUsersDTO: CreateManyUsersDto) {
+    return await this.usersCreateManyProvider.createMany(createManyUsersDTO);
   }
 }
