@@ -17,6 +17,9 @@ import { TagsService } from '../../../tags/tags.service';
 import { Tag } from '../../../tags/tag.entity';
 import { PatchPostDto } from '../../dtos/patch-post.dto';
 import { UsersService } from '../../../users/providers/users.service';
+import { GetPostsDto } from '../../dtos/get-posts.dto';
+import { PaginationProvider } from '../../../common/pagination/providers/pagination.provider';
+import { Paginated } from '../../../common/pagination/interfaces/paginated.interface';
 
 @Injectable()
 export class PostsService {
@@ -30,6 +33,8 @@ export class PostsService {
     private readonly metaOptionsRepository: Repository<MetaOptions>,
 
     private readonly tagService: TagsService,
+
+    private readonly paginationProvider: PaginationProvider,
   ) {}
 
   public async create(@Body() createPostDto: CreatePostDto) {
@@ -60,21 +65,28 @@ export class PostsService {
     return this.postsRepository.save(post);
   }
 
-  public async findAll(userId?: string) {
-    if (userId) {
-      // Logic để tìm tất cả bài viết của người dùng có userId
-      return `Posts for user ${userId}`;
-    } else {
-      // Logic để tìm tất cả bài viết
-      const posts = await this.postsRepository.find({
-        relations: {
-          metaOptions: true, // This will load the metaOptions for each post - apply for this method
-          // author: true,
-          // tags: true,
-        },
-      });
-      return posts;
-    }
+  public async findPosts(postQuery: GetPostsDto): Promise<Paginated<Post>> {
+    const { page, limit } = postQuery;
+    let posts = await this.paginationProvider.paginateQuery(
+      {
+        page,
+        limit,
+      },
+      this.postsRepository,
+    );
+    return posts;
+  }
+
+  public async findPostsByUserId(postQuery: GetPostsDto, userId: string) {
+    // Logic để tìm tất cả bài viết
+    const page = postQuery.page ?? 1;
+    const limit = postQuery.limit ?? 10;
+
+    const posts = await this.postsRepository.find({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return posts;
   }
 
   public createPost(createPostDto: any) {

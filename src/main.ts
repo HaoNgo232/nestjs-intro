@@ -12,7 +12,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
-        enableImplicitConversion: true,
+        enableImplicitConversion: true, // Enable implicit conversion for numbers
+        // This will allow automatic conversion of string to number
       },
     }),
   );
