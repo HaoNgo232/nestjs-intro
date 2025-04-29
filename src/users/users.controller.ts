@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -17,6 +18,8 @@ import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './providers/users.service';
 import { CreateManyUsersDto } from './dtos/create-many-users.dto';
 import { AccessTokenGuard } from '../auth/guards/access-token/access-token.guard';
+import { AuthType } from '../auth/enums/auth-type.enum';
+import { Auth } from '../auth/decorator/auth.decorator';
 
 @Controller('users')
 @ApiTags('Users') // Swagger tag for the controller
@@ -48,7 +51,7 @@ export class UsersController {
     type: Number,
     example: 1,
   })
-  getUsers(@Param() getUsersParamDto?: GetUsersParamDto) {
+  getUserById(@Param() getUsersParamDto?: GetUsersParamDto) {
     if (!getUsersParamDto || !getUsersParamDto.id) {
       return 'Please provide a valid user ID';
     }
@@ -71,6 +74,8 @@ export class UsersController {
   }
 
   @Post()
+  // @SetMetadata('authType', 'none')
+  @Auth(AuthType.None)
   public createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }
