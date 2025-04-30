@@ -8,18 +8,20 @@ import {
   NotFoundException,
   RequestTimeoutException,
 } from '@nestjs/common';
-import { CreatePostDto } from '../../dtos/create-post.dto';
+import { CreatePostDto } from '../dtos/create-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from '../../post.entity';
+import { Post } from '../post.entity';
 import { Repository } from 'typeorm';
-import { MetaOptions } from '../../../meta-options/meta-options.entity';
-import { TagsService } from '../../../tags/tags.service';
-import { Tag } from '../../../tags/tag.entity';
-import { PatchPostDto } from '../../dtos/patch-post.dto';
-import { UsersService } from '../../../users/providers/users.service';
-import { GetPostsDto } from '../../dtos/get-posts.dto';
-import { PaginationProvider } from '../../../common/pagination/providers/pagination.provider';
-import { Paginated } from '../../../common/pagination/interfaces/paginated.interface';
+import { MetaOptions } from '../../meta-options/meta-options.entity';
+import { TagsService } from '../../tags/tags.service';
+import { Tag } from '../../tags/tag.entity';
+import { PatchPostDto } from '../dtos/patch-post.dto';
+import { UsersService } from '../../users/providers/users.service';
+import { GetPostsDto } from '../dtos/get-posts.dto';
+import { PaginationProvider } from '../../common/pagination/providers/pagination.provider';
+import { Paginated } from '../../common/pagination/interfaces/paginated.interface';
+import { CreatePostProvider } from './create-post.provider';
+import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 
 @Injectable()
 export class PostsService {
@@ -35,34 +37,12 @@ export class PostsService {
     private readonly tagService: TagsService,
 
     private readonly paginationProvider: PaginationProvider,
+
+    private readonly createPostProvider: CreatePostProvider,
   ) {}
 
-  public async create(@Body() createPostDto: CreatePostDto) {
-    let author = await this.usersService.findOneById(createPostDto.authorId);
-
-    if (!author) {
-      throw new Error('Author is required');
-    }
-
-    const tags = await this.tagService.findMultipleTags(
-      createPostDto.tags || [],
-    );
-
-    const { metaOptions: _, ...dtoForPost } = createPostDto;
-
-    const transformedDto = {
-      ...dtoForPost,
-      metaOptions: createPostDto.metaOptions
-        ? { ...createPostDto.metaOptions }
-        : undefined,
-    };
-
-    let post = this.postsRepository.create({
-      ...transformedDto,
-      author,
-      tags,
-    });
-    return this.postsRepository.save(post);
+  public async create(createPostDto: CreatePostDto, user: ActiveUserData) {
+    return this.createPostProvider.create(createPostDto, user);
   }
 
   public async findPosts(postQuery: GetPostsDto): Promise<Paginated<Post>> {
