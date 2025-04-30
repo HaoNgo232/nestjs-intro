@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Body,
   Controller,
@@ -15,6 +14,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
 import { GetPostsDto } from './dtos/get-posts.dto';
+import { ActiveUser } from '../auth/decorator/active-user.decorator';
+import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 
 @Controller('posts')
 @ApiTags('Posts') // Swagger tag for the controller
@@ -40,7 +41,11 @@ export class PostsController {
     type: CreatePostDto,
   })
   @Post()
-  public createPost(@Body() createPostDto: CreatePostDto) {
+  public createPost(
+    @Body() createPostDto: CreatePostDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    console.log(user);
     return this.postsService.create(createPostDto);
   }
 

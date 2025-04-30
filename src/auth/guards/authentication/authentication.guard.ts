@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable no-unused-labels */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CanActivate,
   ExecutionContext,
@@ -10,7 +10,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { AccessTokenGuard } from '../access-token/access-token.guard';
 import { AuthType } from '../../enums/auth-type.enum';
 import { AUTH_TYPE_KEY } from '../../constants/auth.constants';
@@ -39,26 +38,18 @@ export class AuthenticationGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]) ?? [AuthenticationGuard.defaultAuthType];
-    console.log(authTypes);
 
     // array of guards
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
     const guards = authTypes.map((type) => this.authtypeGuardMap[type]).flat();
-    console.log(guards);
-
     const error = new UnauthorizedException();
 
     // Loop guards canActivate
     for (const instance of guards) {
-      console.log(instance);
-
       const canActivate = await Promise.resolve(
         instance.canActivate(context),
       ).catch((err) => {
         error: err;
       });
-      console.log(canActivate);
-
       if (canActivate) {
         return true;
       }

@@ -39,7 +39,6 @@ export class AccessTokenGuard implements CanActivate {
       );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       request[REQUEST_USER_KEY] = payload;
-      console.log(payload);
       return true;
     } catch {
       throw new UnauthorizedException();
