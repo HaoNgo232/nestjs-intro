@@ -32,10 +32,6 @@ export class UsersService {
     private userRepository: Repository<User>,
 
     @Inject(profileConfig.KEY)
-    private readonly profileConfiguration: ConfigType<typeof profileConfig>,
-
-    private readonly dataSource: DataSource,
-
     private readonly usersCreateManyProvider: UsersCreateManyProvider,
 
     private readonly createUserProvider: CreateUserProvider,

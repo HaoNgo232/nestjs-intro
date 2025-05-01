@@ -9,5 +9,9 @@ export default registerAs('jwt', () => {
       process.env.JWT_ACCESS_TOKEN_EXPIRATION || '3600',
       10,
     ),
+    refreshTokenExpiresIn: parseInt(
+      process.env.JWT_REFRESH_TOKEN_EXPIRATION || '86400',
+      10,
+    ),
   };
 });
