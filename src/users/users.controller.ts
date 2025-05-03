@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   DefaultValuePipe,
   Get,
@@ -10,6 +11,7 @@ import {
   Query,
   SetMetadata,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { GetUsersParamDto } from './dtos/get-users-param.dto';
@@ -76,6 +78,7 @@ export class UsersController {
   @Post()
   // @SetMetadata('authType', 'none')
   @Auth(AuthType.None)
+  @UseInterceptors(ClassSerializerInterceptor)
   public createUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }
