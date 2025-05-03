@@ -13,5 +13,7 @@ export default registerAs('jwt', () => {
       process.env.JWT_REFRESH_TOKEN_EXPIRATION || '86400',
       10,
     ),
+    googleClientId: process.env.GOOGLE_CLIENT_ID,
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   };
 });

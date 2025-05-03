@@ -25,9 +25,13 @@ export class SignInProvider {
     // Find the user by email
     // Throw an error if the user is not found
     let user = await this.userService.findOneByEmail(signInDto.email);
+
     // Compare the password with the hashed password
     let isEqual: boolean = false;
     try {
+      if (!user.password) {
+        throw new UnauthorizedException('Invalid user credentials');
+      }
       isEqual = await this.hashingProvider.comparePassword(
         signInDto.password,
         user.password,
@@ -38,7 +42,7 @@ export class SignInProvider {
       });
     }
     if (!isEqual) {
-      throw new UnauthorizedException('incorrect password');
+      throw new UnauthorizedException('Incorrect password');
     }
 
     return await this.generateTokensProvider.generateTokens(user);
