@@ -11,7 +11,12 @@ import { UploadsService } from './providers/uploads.service';
 
 @Controller('uploads')
 export class UploadsController {
-  constructor(private readonly uploadsService: UploadsService) {}
+  constructor(
+    /**
+     * Inject UploadsService
+     */
+    private readonly uploadsService: UploadsService,
+  ) {}
   @UseInterceptors(FileInterceptor('file'))
   @ApiHeaders([
     { name: 'Content-Type', description: 'multipart/form-data' },
