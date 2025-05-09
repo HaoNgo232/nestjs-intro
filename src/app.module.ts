@@ -19,6 +19,7 @@ import { AuthenticationGuard } from './auth/guards/authentication/authentication
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
 import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
 import { UploadsModule } from './uploads/uploads.module';
+import { MailModule } from './mail/mail.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -55,6 +56,7 @@ const ENV = process.env.NODE_ENV;
     MetaOptionsModule,
     PaginationModule,
     UploadsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
