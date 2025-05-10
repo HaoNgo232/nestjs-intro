@@ -28,13 +28,9 @@ import { GoogleUser } from '../interfaces/google-user.interface';
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
-
     @InjectRepository(User)
     private userRepository: Repository<User>,
 
-    @Inject(profileConfig.KEY)
     private readonly usersCreateManyProvider: UsersCreateManyProvider,
 
     private readonly createUserProvider: CreateUserProvider,

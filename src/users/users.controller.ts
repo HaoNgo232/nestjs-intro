@@ -9,8 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  SetMetadata,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -19,7 +17,6 @@ import { PatchUserDto } from './dtos/patch-user.dto';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './providers/users.service';
 import { CreateManyUsersDto } from './dtos/create-many-users.dto';
-import { AccessTokenGuard } from '../auth/guards/access-token/access-token.guard';
 import { AuthType } from '../auth/enums/auth-type.enum';
 import { Auth } from '../auth/decorator/auth.decorator';
 
